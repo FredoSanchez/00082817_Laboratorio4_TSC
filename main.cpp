@@ -14,12 +14,6 @@ int main()
     Vector b;
     Vector T;
 
-    
-    cout << "IMPLEMENTACI"<<char(224)<<"N DEL M"<<char(144)<<"TODO DE LOS ELEMENTOS FINITOS\n"
-         << "\t- ECUACIONES DE NAVIER-STOKES\n" << "\t- 1 DIMENSI"<<char(224)<<"N\n"
-         << "\t- FUNCIONES DE FORMA LINEALES\n" << "\t- PESOS DE GALERKIN\n"
-         << "*********************************************************************************\n\n";
-
     mesh m;
     leerMallayCondiciones(m);
 
@@ -35,6 +29,7 @@ int main()
     
     showMatrix(K);
 
+    /*
     zeroes(T,b.size());
 
     calculate(K,b,T);
@@ -42,6 +37,7 @@ int main()
     cout << "La respuesta es: " << endl;
     
     showVector(T);
+    */
 
     return 0;
 }
