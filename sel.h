@@ -1,61 +1,79 @@
-void createLocalA(Matrix &A,mesh m){
-    float u_bar = m.getParameter(ADJECTIVE_VELOCITY);
-    A.at(0).at(0) += -u_bar/2;  A.at(0).at(1) += u_bar/2;
-    A.at(1).at(0) += -u_bar/2;  A.at(1).at(1) += u_bar/2;
+void createLocalT(Matrix &T,mesh m){
+    float tau = m.getParameter(TAU_CONST);
+    T.at(0).at(0) += -tau/8;  T.at(0).at(1) += tau/8;
+    T.at(1).at(0) += -tau/8;  T.at(1).at(1) += tau/8;
 }
 
-void createLocalB(Matrix &B,mesh m){
+void createLocalQ(Matrix &Q,mesh m){
     float l = m.getParameter(ELEMENT_LENGTH);
-    float nu = m.getParameter(DYNAMIC_VISCOSITY);
-    B.at(0).at(0) += nu/l;      B.at(0).at(1) += -nu/l;
-    B.at(1).at(0) += -nu/l;     B.at(1).at(1) += nu/l;
+    float kappa = m.getParameter(KAPPA_CONST);
+    Q.at(0).at(0) += kappa/l;      Q.at(0).at(1) += -kappa/l;
+    Q.at(1).at(0) += -kappa/l;     Q.at(1).at(1) += kappa/l;
 }
 
-void createLocalC(Matrix &C,mesh m){
-    float rho = m.getParameter(DENSITY);
-    C.at(0).at(0) += -1/(2*rho);    C.at(0).at(1) += 1/(2*rho);
-    C.at(1).at(0) += -1/(2*rho);    C.at(1).at(1) += 1/(2*rho);
+void createLocalL(Matrix &L,mesh m){
+    float lambda = m.getParameter(LAMBDA_CONST);
+    L.at(0).at(0) += -lambda/3;  L.at(0).at(1) += lambda/3;
+    L.at(1).at(0) += -lambda/3;  L.at(1).at(1) += lambda/3;
+}
+
+void createLocalU(Matrix &U,mesh m){
+    float l = m.getParameter(ELEMENT_LENGTH);
+    float ipsilon = m.getParameter(IPSILON_CONST);
+    U.at(0).at(0) += ipsilon/l;      U.at(0).at(1) += -ipsilon/l;
+    U.at(1).at(0) += -ipsilon/l;     U.at(1).at(1) += ipsilon/l;
+}
+
+void createLocalA(Matrix &A,mesh m){
+    float alpha = m.getParameter(ALPHA_CONST);
+    A.at(0).at(0) += -3.0*alpha/2;  A.at(0).at(1) += 3.0*alpha/2;
+    A.at(1).at(0) += -3.0*alpha/2;  A.at(1).at(1) += 3.0*alpha/2;
 }
 
 void createLocalD(Matrix &D,mesh m){
-    D.at(0).at(0) += -0.5;  D.at(0).at(1) += 0.5;
-    D.at(1).at(0) += -0.5;  D.at(1).at(1) += 0.5;
+    float delta = m.getParameter(DELTA_CONST);
+    D.at(0).at(0) += -delta/2.0;  D.at(0).at(1) += delta/2.0;
+    D.at(1).at(0) += -delta/2.0;  D.at(1).at(1) += delta/2.0;
 }
 
 Matrix createLocalK(int element,mesh &m){
-    Matrix K,A,B,C,D;
+    Matrix K, T, Q, L, U, A, D;
 
+    zeroes(T,2);
+    zeroes(Q,2);
+    zeroes(L,2);
+    zeroes(U,2);
     zeroes(A,2);
-    zeroes(B,2);
-    zeroes(C,2);
     zeroes(D,2);
+    createLocalT(T,m);
+    createLocalQ(Q,m);
+    createLocalL(L,m);
+    createLocalU(U,m);
     createLocalA(A,m);
-    createLocalB(B,m);
-    createLocalC(C,m);
     createLocalD(D,m);
 
     Vector row1, row2, row3, row4;
 
 
-    row1.push_back(A.at(0).at(0)+B.at(0).at(0)); 
-    row1.push_back(A.at(0).at(1)+B.at(0).at(1));
-    row1.push_back(C.at(0).at(0));                  
-    row1.push_back(C.at(0).at(1));
+    row1.push_back(T.at(0).at(0)+Q.at(0).at(0)); 
+    row1.push_back(T.at(0).at(1)+Q.at(0).at(1));
+    row1.push_back(L.at(0).at(0)+U.at(0).at(0));                  
+    row1.push_back(L.at(0).at(1)+U.at(0).at(1));
 
-    row2.push_back(A.at(1).at(0)+B.at(1).at(0)); 
-    row2.push_back(A.at(1).at(1)+B.at(1).at(1));
-    row2.push_back(C.at(1).at(0)); 
-    row2.push_back(C.at(1).at(1));
+    row2.push_back(T.at(1).at(0)+Q.at(1).at(0)); 
+    row2.push_back(T.at(1).at(1)+Q.at(1).at(1));
+    row2.push_back(L.at(1).at(0)+U.at(1).at(0));                  
+    row2.push_back(L.at(1).at(1)+U.at(1).at(1));
 
+    row3.push_back(A.at(0).at(0)); 
+    row3.push_back(A.at(0).at(1));   
     row3.push_back(D.at(0).at(0)); 
     row3.push_back(D.at(0).at(1));
-    row3.push_back(0); 
-    row3.push_back(0);
 
+    row4.push_back(A.at(1).at(0));
+    row4.push_back(A.at(1).at(1)); 
     row4.push_back(D.at(1).at(0)); 
     row4.push_back(D.at(1).at(1));
-    row4.push_back(0); 
-    row4.push_back(0);
 
     K.push_back(row1); 
     K.push_back(row2); 
@@ -68,12 +86,14 @@ Matrix createLocalK(int element,mesh &m){
 Vector createLocalb(int element,mesh &m){
     Vector b;
 
-    float f = m.getParameter(EXTERNAL_FORCE), l = m.getParameter(ELEMENT_LENGTH);
+    float psi = m.getParameter(PSI_CONST),
+          eta = m.getParameter(ETA_CONST), 
+          l = m.getParameter(ELEMENT_LENGTH);
     
-    b.push_back(f*l/2); 
-    b.push_back(f*l/2); 
-    b.push_back(0); 
-    b.push_back(0);
+    b.push_back(psi*l/2); 
+    b.push_back(psi*l/2); 
+    b.push_back(eta*l/2); 
+    b.push_back(eta*l/2);
 
     return b;
 }
